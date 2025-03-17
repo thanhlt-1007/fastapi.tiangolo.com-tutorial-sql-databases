@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Field, create_engine, Session
 from typing import Annotated
 
@@ -35,8 +35,21 @@ async def hello():
     }
 
 @app.post("/heroes")
-async def create_hero(hero: Hero, session: SessionDep) -> Hero:
+async def create_hero(
+    hero: Hero,
+    session: SessionDep,
+) -> Hero:
     session.add(hero)
     session.commit()
     session.refresh(hero)
+    return hero
+
+@app.get("/heroes/{hero_id}")
+async def read_heroes(
+    hero_id: int,
+    session: SessionDep,
+) -> Hero:
+    hero = session.get(Hero, hero_id)
+    if not hero:
+        raise HTTPException(status_code=404, detail="Hero not found")
     return hero
