@@ -33,3 +33,10 @@ async def hello():
     return {
         "message": "Hello World"
     }
+
+@app.post("/heroes")
+async def create_hero(hero: Hero, session: SessionDep) -> Hero:
+    session.add(hero)
+    session.commit()
+    session.refresh(hero)
+    return hero
