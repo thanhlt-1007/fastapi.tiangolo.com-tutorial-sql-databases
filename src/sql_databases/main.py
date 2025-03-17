@@ -1,14 +1,27 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlmodel import SQLModel, Field, create_engine, Session
+from fastapi import FastAPI, Depends, HTTPException, Query
+from sqlmodel import SQLModel, Field, create_engine, Session, select
 from typing import Annotated
 
 app = FastAPI()
 
-class Hero(SQLModel, table=True):
-    id: int | None = Field(primary_key=True, default=None)
+class HeroBase(SQLModel):
     name: str = Field(index=True)
     age: int | None = Field(default=None, index=True)
+
+class Hero(HeroBase, table=True):
+    id: int | None = Field(primary_key=True, default=None)
     secret_name: str = Field()
+
+class HeroPublic(HeroBase):
+    id: int
+
+class HeroCreate(HeroBase):
+    secret_name: str
+
+class HeroUpdate(HeroBase):
+    name: str | None = None
+    age: int | None = None
+    secret_name: str | None = None
 
 sqlite_file_name = "database.sqlite"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -34,15 +47,26 @@ async def hello():
         "message": "Hello World"
     }
 
-@app.post("/heroes")
-async def create_hero(
-    hero: Hero,
+@app.get("/heroes")
+def read_heroes(
     session: SessionDep,
-) -> Hero:
-    session.add(hero)
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+) -> list[Hero]:
+    heroes = session.exec(select(Hero).offset(offset).limit(limit)).all()
+    return heroes
+
+@app.post("/heroes", response_model=HeroPublic)
+async def create_hero(
+    hero: HeroCreate,
+    session: SessionDep,
+) -> HeroPublic:
+    db_herro = Hero.model_validate(hero)
+
+    session.add(db_herro)
     session.commit()
-    session.refresh(hero)
-    return hero
+    session.refresh(db_herro)
+    return db_herro
 
 @app.get("/heroes/{hero_id}")
 async def read_heroes(
