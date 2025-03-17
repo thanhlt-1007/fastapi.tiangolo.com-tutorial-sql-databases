@@ -27,3 +27,5 @@ go.work.sum
 /artifacts
 /cache
 __pycache__
+
+database.sqlite

@@ -9,6 +9,7 @@ packages = [{include = "sql_databases", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = {extras = ["standard"], version = "^0.115.11"}
+sqlmodel = "^0.0.24"
 
 
 [build-system]
