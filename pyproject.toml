@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "sql-databases"
+version = "0.1.0"
+description = ""
+authors = ["thanhlt-1007 <le.tan.thanh@sun-asterisk.com>"]
+readme = "README.md"
+packages = [{include = "sql_databases", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.115.11"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
